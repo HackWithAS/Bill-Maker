@@ -154,18 +154,19 @@
 
     <div class="card">
       <div class="items-header">
-        <span class="items-title">Work Items &nbsp;<small style="color:#999;font-weight:400">(Nos × Length × Height × Rate)</small></span>
+        <span class="items-title">Work Items &nbsp;<small style="color:#999;font-weight:400">(Nos × Length × Type × Rate)</small></span>
         <button class="btn btn-outline" onclick="addLabourRow()">+ Add Row</button>
       </div>
       <div class="table-wrap">
         <table>
           <thead><tr>
             <th style="width:40px">Sr.</th>
-            <th style="min-width:260px">Description</th>
-            <th style="width:65px">Nos</th>
+            <th style="min-width:220px">Description</th>
+            <th style="width:60px">Nos</th>
             <th style="width:80px">Length (m)</th>
-            <th style="width:80px">Height (m)</th>
-            <th style="width:80px">Total (m²)</th>
+            <th style="width:80px">Height/W/D</th>
+            <th style="width:110px">Type</th>
+            <th style="width:80px">Total</th>
             <th style="width:75px">Rate (₹)</th>
             <th style="width:100px">Amount (₹)</th>
             <th style="width:36px"></th>
@@ -319,36 +320,85 @@ function switchTab(tab) {
 var lSeq = 0;
 var lIds = [];
 
-function addLabourRow(desc, nos, len, ht, rate) {
+function addLabourRow(desc, nos, len, ht, mtype, rate) {
   lSeq++;
   var id = 'L' + lSeq;
   lIds.push(id);
+  var selType = mtype || 'sqft';
 
   var tr = document.createElement('tr');
   tr.id = 'row-' + id;
   tr.innerHTML =
     '<td style="text-align:center;color:#aaa;font-size:12px" id="lnum-'+id+'">'+lIds.length+'</td>' +
-    '<td><input type="text" id="ldesc-'+id+'" value="'+(desc||'')+'" placeholder="Work description..." oninput="calcL(\''+id+'\')" style="width:100%;min-width:240px"></td>' +
-    '<td><input type="number" id="lnos-'+id+'" value="'+(nos||'')+'" placeholder="0" style="width:58px;text-align:right" oninput="calcL(\''+id+'\')"></td>' +
+    '<td><input type="text" id="ldesc-'+id+'" value="'+(desc||'')+'" placeholder="Work description..." oninput="calcL(\''+id+'\')" style="width:100%;min-width:200px"></td>' +
+    '<td><input type="number" id="lnos-'+id+'" value="'+(nos||'')+'" placeholder="0" style="width:52px;text-align:right" oninput="calcL(\''+id+'\')" title="Nos (RFT me ignored)"></td>' +
     '<td><input type="number" id="llen-'+id+'" value="'+(len||'')+'" placeholder="0.00" step="0.01" style="width:70px;text-align:right" oninput="calcL(\''+id+'\')"></td>' +
-    '<td><input type="number" id="lht-'+id+'"  value="'+(ht||'')+'"  placeholder="0.00" step="0.01" style="width:70px;text-align:right" oninput="calcL(\''+id+'\')"></td>' +
+    '<td id="lhtcell-'+id+'"><input type="number" id="lht-'+id+'"  value="'+(ht||'')+'"  placeholder="0.00" step="0.01" style="width:70px;text-align:right" oninput="calcL(\''+id+'\')"></td>' +
+    '<td>' +
+      '<select id="ltype-'+id+'" onchange="onTypeChange(\''+id+'\')" style="width:100px;font-size:12px">' +
+        '<option value="sqft"'+(selType==='sqft'?' selected':'')+'>Sq ft (sq ft)</option>' +
+        '<option value="rft"'+(selType==='rft'?' selected':'')+'>Running Ft (RFT)</option>' +
+        '<option value="cft"'+(selType==='cft'?' selected':'')+'>Cubic Ft (CFT)</option>' +
+      '</select>' +
+    '</td>' +
     '<td id="ltot-'+id+'" style="text-align:right;color:#666;font-weight:600">—</td>' +
     '<td><input type="number" id="lrate-'+id+'" value="'+(rate||'')+'" placeholder="47" style="width:68px;text-align:right" oninput="calcL(\''+id+'\')"></td>' +
     '<td id="lamt-'+id+'" style="text-align:right;font-weight:700;color:#E05A00">—</td>' +
     '<td><button class="del-btn" onclick="delL(\''+id+'\')">×</button></td>';
   document.getElementById('labour-tbody').appendChild(tr);
+  onTypeChange(id);
+  calcL(id);
+}
+
+function onTypeChange(id) {
+  var type = document.getElementById('ltype-'+id).value;
+  var htCell = document.getElementById('lhtcell-'+id);
+  var nosEl  = document.getElementById('lnos-'+id);
+  if (type === 'rft') {
+    htCell.innerHTML = '<span style="color:#bbb;font-size:11px">N/A</span>';
+    nosEl.style.opacity = '0.35';
+    nosEl.title = 'RFT me Nos use nahi hota';
+  } else if (type === 'cft') {
+    // Width & Depth – reuse ht field as Width, add Depth inline note
+    htCell.innerHTML = '<input type="number" id="lht-'+id+'" value="" placeholder="W" step="0.01" style="width:32px;text-align:right" oninput="calcL(\''+id+'\')"> <input type="number" id="ldepth-'+id+'" value="" placeholder="D" step="0.01" style="width:32px;text-align:right" oninput="calcL(\''+id+'\')"> <span style="font-size:9px;color:#aaa">W D</span>';
+    nosEl.style.opacity = '1';
+    nosEl.title = 'Nos';
+  } else {
+    htCell.innerHTML = '<input type="number" id="lht-'+id+'" value="" placeholder="0.00" step="0.01" style="width:70px;text-align:right" oninput="calcL(\''+id+'\')">';
+    nosEl.style.opacity = '1';
+    nosEl.title = 'Nos';
+  }
   calcL(id);
 }
 
 function calcL(id) {
-  var nos  = parseFloat(document.getElementById('lnos-'+id).value)  || 0;
-  var len  = parseFloat(document.getElementById('llen-'+id).value)  || 0;
-  var ht   = parseFloat(document.getElementById('lht-'+id).value)   || 0;
-  var rate = parseFloat(document.getElementById('lrate-'+id).value) || 0;
-  var tot  = nos * len * ht;
-  var amt  = tot * rate;
-  document.getElementById('ltot-'+id).textContent = tot > 0 ? fmtNum(tot) : '—';
-  document.getElementById('lamt-'+id).textContent = amt > 0 ? '₹'+fmtNum(amt) : '—';
+  var nos  = parseFloat(document.getElementById('lnos-'+id) && document.getElementById('lnos-'+id).value)  || 0;
+  var len  = parseFloat(document.getElementById('llen-'+id) && document.getElementById('llen-'+id).value)  || 0;
+  var rate = parseFloat(document.getElementById('lrate-'+id) && document.getElementById('lrate-'+id).value) || 0;
+  var type = document.getElementById('ltype-'+id) ? document.getElementById('ltype-'+id).value : 'sqft';
+
+  var tot = 0;
+  var totLabel = '';
+
+  if (type === 'sqft') {
+    var ht = parseFloat(document.getElementById('lht-'+id) && document.getElementById('lht-'+id).value) || 0;
+    tot = len * ht * nos * 10.76;
+    totLabel = tot > 0 ? fmtNum(tot)+' sqft' : '—';
+  } else if (type === 'rft') {
+    tot = len * 3.28;
+    totLabel = tot > 0 ? fmtNum(tot)+' rft' : '—';
+  } else if (type === 'cft') {
+    var wd = parseFloat(document.getElementById('lht-'+id) && document.getElementById('lht-'+id).value) || 0;
+    var dp = parseFloat(document.getElementById('ldepth-'+id) && document.getElementById('ldepth-'+id).value) || 0;
+    tot = len * wd * dp;
+    totLabel = tot > 0 ? fmtNum(tot)+' cft' : '—';
+  }
+
+  var amt = tot * rate;
+  var totEl = document.getElementById('ltot-'+id);
+  var amtEl = document.getElementById('lamt-'+id);
+  if (totEl) totEl.textContent = totLabel;
+  if (amtEl) amtEl.textContent = amt > 0 ? '₹'+fmtNum(amt) : '—';
   updateLTotal();
 }
 
@@ -362,11 +412,22 @@ function delL(id) {
 function updateLTotal() {
   var total = 0;
   lIds.forEach(function(id) {
-    var nos  = parseFloat(document.getElementById('lnos-'+id)  && document.getElementById('lnos-'+id).value)  || 0;
     var len  = parseFloat(document.getElementById('llen-'+id)  && document.getElementById('llen-'+id).value)  || 0;
-    var ht   = parseFloat(document.getElementById('lht-'+id)   && document.getElementById('lht-'+id).value)   || 0;
+    var nos  = parseFloat(document.getElementById('lnos-'+id)  && document.getElementById('lnos-'+id).value)  || 0;
     var rate = parseFloat(document.getElementById('lrate-'+id) && document.getElementById('lrate-'+id).value) || 0;
-    total += nos * len * ht * rate;
+    var type = document.getElementById('ltype-'+id) ? document.getElementById('ltype-'+id).value : 'sqft';
+    var tot = 0;
+    if (type === 'sqft') {
+      var ht = parseFloat(document.getElementById('lht-'+id) && document.getElementById('lht-'+id).value) || 0;
+      tot = len * ht * nos * 10.76;
+    } else if (type === 'rft') {
+      tot = len * 3.28;
+    } else if (type === 'cft') {
+      var wd = parseFloat(document.getElementById('lht-'+id) && document.getElementById('lht-'+id).value) || 0;
+      var dp = parseFloat(document.getElementById('ldepth-'+id) && document.getElementById('ldepth-'+id).value) || 0;
+      tot = len * wd * dp;
+    }
+    total += tot * rate;
   });
   document.getElementById('l-total-display').textContent = '₹' + fmtNum(total);
   document.getElementById('l-words-display').textContent = numWords(total);
@@ -463,14 +524,33 @@ function buildLabourHTML() {
     var desc = document.getElementById('ldesc-'+id).value || '';
     var nos  = parseFloat(document.getElementById('lnos-'+id).value)  || 0;
     var len  = parseFloat(document.getElementById('llen-'+id).value)  || 0;
-    var ht   = parseFloat(document.getElementById('lht-'+id).value)   || 0;
     var rate = parseFloat(document.getElementById('lrate-'+id).value) || 0;
-    var tot  = nos * len * ht;
-    var amt  = tot * rate;
+    var type = document.getElementById('ltype-'+id) ? document.getElementById('ltype-'+id).value : 'sqft';
+    var tot = 0; var totLabel = ''; var typeLabel = '';
+
+    if (type === 'sqft') {
+      var ht = parseFloat(document.getElementById('lht-'+id) && document.getElementById('lht-'+id).value) || 0;
+      tot = len * ht * nos * 10.76;
+      totLabel = fmtNum(tot)+' sqft';
+      typeLabel = 'Sq ft';
+    } else if (type === 'rft') {
+      tot = len * 3.28;
+      totLabel = fmtNum(tot)+' rft';
+      typeLabel = 'RFT';
+    } else if (type === 'cft') {
+      var wd = parseFloat(document.getElementById('lht-'+id) && document.getElementById('lht-'+id).value) || 0;
+      var dp = parseFloat(document.getElementById('ldepth-'+id) && document.getElementById('ldepth-'+id).value) || 0;
+      tot = len * wd * dp;
+      totLabel = fmtNum(tot)+' cft';
+      typeLabel = 'CFT';
+    }
+
+    var amt = tot * rate;
     total += amt;
     rows += '<tr><td>'+(i+1)+'</td><td>'+desc+'</td>' +
-      '<td class="c">'+(nos||'')+'</td><td class="c">'+(len||'')+'</td><td class="c">'+(ht||'')+'</td>' +
-      '<td class="c">'+(tot>0?fmtNum(tot):'')+'</td><td class="c">'+(rate?'₹'+rate:'')+'</td>' +
+      '<td class="c">'+(nos&&type!=='rft'?nos:'—')+'</td><td class="c">'+(len||'')+'</td>' +
+      '<td class="c">'+typeLabel+'</td>' +
+      '<td class="c">'+(tot>0?totLabel:'')+'</td><td class="c">'+(rate?'₹'+rate:'')+'</td>' +
       '<td class="c"><strong>₹'+fmtNum(amt)+'</strong></td></tr>';
   });
 
@@ -483,7 +563,7 @@ function buildLabourHTML() {
     (address ? '<div style="font-size:12px;color:#555">'+address+'</div>' : '') +
     (subject ? '<div style="font-size:12px;color:#666;margin-top:4px"><em>'+subject+'</em></div>' : '') + '</div>' +
     '<table class="bill-tbl"><thead><tr>' +
-    '<th>Sr.</th><th>Description</th><th class="c">Nos</th><th class="c">Length (m)</th><th class="c">Height (m)</th><th class="c">Total (m²)</th><th class="c">Rate (₹)</th><th class="c">Amount (₹)</th>' +
+    '<th>Sr.</th><th>Description</th><th class="c">Nos</th><th class="c">Length (m)</th><th class="c">Type</th><th class="c">Total</th><th class="c">Rate (₹)</th><th class="c">Amount (₹)</th>' +
     '</tr></thead><tbody>'+rows+'</tbody>' +
     '<tfoot><tr class="bill-total-row"><td colspan="7" style="text-align:right;letter-spacing:.5px">TOTAL PAYABLE AMOUNT</td><td class="c" style="font-size:15px;letter-spacing:.3px">₹'+fmtNum(total)+'</td></tr></tfoot></table>' +
     '<div class="bill-words">('+numWords(total)+')</div>' +
