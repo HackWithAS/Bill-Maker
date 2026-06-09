@@ -354,19 +354,18 @@ function onTypeChange(id) {
   var type = document.getElementById('ltype-'+id).value;
   var htCell = document.getElementById('lhtcell-'+id);
   var nosEl  = document.getElementById('lnos-'+id);
+  nosEl.style.opacity = '1';
+  nosEl.title = 'Nos';
   if (type === 'rft') {
     htCell.innerHTML = '<span style="color:#bbb;font-size:11px">N/A</span>';
-    nosEl.style.opacity = '0.35';
-    nosEl.title = 'RFT me Nos use nahi hota';
   } else if (type === 'cft') {
-    // Width & Depth – reuse ht field as Width, add Depth inline note
-    htCell.innerHTML = '<input type="number" id="lht-'+id+'" value="" placeholder="W" step="0.01" style="width:32px;text-align:right" oninput="calcL(\''+id+'\')"> <input type="number" id="ldepth-'+id+'" value="" placeholder="D" step="0.01" style="width:32px;text-align:right" oninput="calcL(\''+id+'\')"> <span style="font-size:9px;color:#aaa">W D</span>';
-    nosEl.style.opacity = '1';
-    nosEl.title = 'Nos';
+    htCell.innerHTML =
+      '<div style="display:flex;gap:4px;align-items:center">' +
+        '<input type="number" id="lht-'+id+'" placeholder="W" step="0.01" style="width:40px;text-align:right;padding:4px 6px;border:1.5px solid #E8D8CC;border-radius:6px;font-size:12px" oninput="calcL(\''+id+'\')">' +
+        '<input type="number" id="ldepth-'+id+'" placeholder="D" step="0.01" style="width:40px;text-align:right;padding:4px 6px;border:1.5px solid #E8D8CC;border-radius:6px;font-size:12px" oninput="calcL(\''+id+'\')">' +
+      '</div>';
   } else {
-    htCell.innerHTML = '<input type="number" id="lht-'+id+'" value="" placeholder="0.00" step="0.01" style="width:70px;text-align:right" oninput="calcL(\''+id+'\')">';
-    nosEl.style.opacity = '1';
-    nosEl.title = 'Nos';
+    htCell.innerHTML = '<input type="number" id="lht-'+id+'" value="" placeholder="0.00" step="0.01" style="width:70px;text-align:right;padding:7px 10px;border:1.5px solid transparent;border-radius:6px;font-size:13px;background:transparent" oninput="calcL(\''+id+'\')">';
   }
   calcL(id);
 }
@@ -385,12 +384,12 @@ function calcL(id) {
     tot = len * ht * nos * 10.76;
     totLabel = tot > 0 ? fmtNum(tot)+' sqft' : '—';
   } else if (type === 'rft') {
-    tot = len * 3.28;
+    tot = nos * len * 3.28;
     totLabel = tot > 0 ? fmtNum(tot)+' rft' : '—';
   } else if (type === 'cft') {
     var wd = parseFloat(document.getElementById('lht-'+id) && document.getElementById('lht-'+id).value) || 0;
     var dp = parseFloat(document.getElementById('ldepth-'+id) && document.getElementById('ldepth-'+id).value) || 0;
-    tot = len * wd * dp;
+    tot = nos * len * wd * dp;
     totLabel = tot > 0 ? fmtNum(tot)+' cft' : '—';
   }
 
@@ -421,11 +420,11 @@ function updateLTotal() {
       var ht = parseFloat(document.getElementById('lht-'+id) && document.getElementById('lht-'+id).value) || 0;
       tot = len * ht * nos * 10.76;
     } else if (type === 'rft') {
-      tot = len * 3.28;
+      tot = nos * len * 3.28;
     } else if (type === 'cft') {
       var wd = parseFloat(document.getElementById('lht-'+id) && document.getElementById('lht-'+id).value) || 0;
       var dp = parseFloat(document.getElementById('ldepth-'+id) && document.getElementById('ldepth-'+id).value) || 0;
-      tot = len * wd * dp;
+      tot = nos * len * wd * dp;
     }
     total += tot * rate;
   });
@@ -534,13 +533,13 @@ function buildLabourHTML() {
       totLabel = fmtNum(tot)+' sqft';
       typeLabel = 'Sq ft';
     } else if (type === 'rft') {
-      tot = len * 3.28;
+      tot = nos * len * 3.28;
       totLabel = fmtNum(tot)+' rft';
       typeLabel = 'RFT';
     } else if (type === 'cft') {
       var wd = parseFloat(document.getElementById('lht-'+id) && document.getElementById('lht-'+id).value) || 0;
       var dp = parseFloat(document.getElementById('ldepth-'+id) && document.getElementById('ldepth-'+id).value) || 0;
-      tot = len * wd * dp;
+      tot = nos * len * wd * dp;
       totLabel = fmtNum(tot)+' cft';
       typeLabel = 'CFT';
     }
