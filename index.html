@@ -324,25 +324,26 @@ function addLabourRow(desc, nos, len, ht, mtype, rate) {
   lSeq++;
   var id = 'L' + lSeq;
   lIds.push(id);
-  var selType = mtype || 'sqft';
+  var selType = mtype || '';
 
   var tr = document.createElement('tr');
   tr.id = 'row-' + id;
   tr.innerHTML =
     '<td style="text-align:center;color:#aaa;font-size:12px" id="lnum-'+id+'">'+lIds.length+'</td>' +
     '<td><input type="text" id="ldesc-'+id+'" value="'+(desc||'')+'" placeholder="Work description..." oninput="calcL(\''+id+'\')" style="width:100%;min-width:200px"></td>' +
-    '<td><input type="number" id="lnos-'+id+'" value="'+(nos||'')+'" placeholder="0" style="width:52px;text-align:right" oninput="calcL(\''+id+'\')" title="Nos (RFT me ignored)"></td>' +
+    '<td><input type="number" id="lnos-'+id+'" value="'+(nos||'')+'" placeholder="0" style="width:52px;text-align:right" oninput="calcL(\''+id+'\')" title="Nos"></td>' +
     '<td><input type="number" id="llen-'+id+'" value="'+(len||'')+'" placeholder="0.00" step="0.01" style="width:70px;text-align:right" oninput="calcL(\''+id+'\')"></td>' +
     '<td id="lhtcell-'+id+'"><input type="number" id="lht-'+id+'"  value="'+(ht||'')+'"  placeholder="0.00" step="0.01" style="width:70px;text-align:right" oninput="calcL(\''+id+'\')"></td>' +
     '<td>' +
       '<select id="ltype-'+id+'" onchange="onTypeChange(\''+id+'\')" style="width:100px;font-size:12px">' +
+        '<option value="" disabled'+(selType===''?' selected':'')+'>-- Select --</option>' +
         '<option value="sqft"'+(selType==='sqft'?' selected':'')+'>Sq ft (sq ft)</option>' +
         '<option value="rft"'+(selType==='rft'?' selected':'')+'>Running Ft (RFT)</option>' +
         '<option value="cft"'+(selType==='cft'?' selected':'')+'>Cubic Ft (CFT)</option>' +
       '</select>' +
     '</td>' +
     '<td id="ltot-'+id+'" style="text-align:right;color:#666;font-weight:600">—</td>' +
-    '<td><input type="number" id="lrate-'+id+'" value="'+(rate||'')+'" placeholder="00" style="width:68px;text-align:right" oninput="calcL(\''+id+'\')"></td>' +
+    '<td><input type="number" id="lrate-'+id+'" value="'+(rate||'')+'" placeholder="47" style="width:68px;text-align:right" oninput="calcL(\''+id+'\')"></td>' +
     '<td id="lamt-'+id+'" style="text-align:right;font-weight:700;color:#E05A00">—</td>' +
     '<td><button class="del-btn" onclick="delL(\''+id+'\')">×</button></td>';
   document.getElementById('labour-tbody').appendChild(tr);
@@ -443,8 +444,9 @@ function addMaterialRow(desc, qty, unit, rate) {
   mIds.push(id);
 
   var units = ['pcs','sq.ft.','m²','m','kg','ton','bag','ltr','nos','month','—'];
-  var opts = units.map(function(u){
-    return '<option value="'+u+'"'+(u===(unit||'pcs')?' selected':'')+'>'+u+'</option>';
+  var opts = '<option value="" disabled'+((!unit||unit==='')?' selected':'')+'>-- Select --</option>';
+  opts += units.map(function(u){
+    return '<option value="'+u+'"'+(u===unit?' selected':'')+'>'+u+'</option>';
   }).join('');
 
   var tr = document.createElement('tr');
