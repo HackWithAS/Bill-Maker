@@ -342,7 +342,7 @@ function addLabourRow(desc, nos, len, ht, mtype, rate) {
       '</select>' +
     '</td>' +
     '<td id="ltot-'+id+'" style="text-align:right;color:#666;font-weight:600">—</td>' +
-    '<td><input type="number" id="lrate-'+id+'" value="'+(rate||'')+'" placeholder="47" style="width:68px;text-align:right" oninput="calcL(\''+id+'\')"></td>' +
+    '<td><input type="number" id="lrate-'+id+'" value="'+(rate||'')+'" placeholder="00" style="width:68px;text-align:right" oninput="calcL(\''+id+'\')"></td>' +
     '<td id="lamt-'+id+'" style="text-align:right;font-weight:700;color:#E05A00">—</td>' +
     '<td><button class="del-btn" onclick="delL(\''+id+'\')">×</button></td>';
   document.getElementById('labour-tbody').appendChild(tr);
