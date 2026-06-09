@@ -96,13 +96,17 @@
   .bill-to-name{font-weight:700;font-size:14px;}
   .bill-tbl{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:12px;}
   .bill-tbl th{background:#1A1208;color:#fff;padding:8px 10px;text-align:left;font-size:11px;}
+  .bill-tbl th.c{text-align:center;}
   .bill-tbl td{padding:7px 10px;border-bottom:1px solid #EEE;}
   .bill-tbl tr:nth-child(even) td{background:#FAFAFA;}
-  .bill-tbl .r{text-align:right;}
-  .bill-total-row td{background:#E05A00 !important;color:#fff !important;font-weight:700;padding:10px;}
+  .bill-tbl .r{text-align:right;} .bill-tbl .c{text-align:center;}
+  .bill-total-row td{background:#E05A00 !important;color:#fff !important;font-weight:800;font-size:14px;padding:12px 10px;}
   .bill-words{font-size:11px;color:#555;font-style:italic;margin-bottom:16px;}
-  .bill-footer{margin-top:24px;border-top:1px solid #EEE;padding-top:16px;display:flex;justify-content:flex-end;}
-  .bill-sign-line{border-top:1px solid #999;width:160px;margin:30px auto 4px;}
+  .bill-footer{margin-top:10px;padding-top:20px;display:flex;justify-content:flex-end;}
+  .bill-sign-box{text-align:center;min-width:220px;}
+  .bill-sign-space{height:90px;border:1px dashed #CCC;border-radius:6px;margin-bottom:8px;background:#FAFAFA;}
+  .bill-sign-label{font-size:11px;color:#888;}
+  .bill-sign-name{font-size:12px;font-weight:700;margin-top:4px;}
 
   @media(max-width:640px){
     .form-grid,.form-grid.three{grid-template-columns:1fr;}
@@ -465,9 +469,9 @@ function buildLabourHTML() {
     var amt  = tot * rate;
     total += amt;
     rows += '<tr><td>'+(i+1)+'</td><td>'+desc+'</td>' +
-      '<td class="r">'+(nos||'')+'</td><td class="r">'+(len||'')+'</td><td class="r">'+(ht||'')+'</td>' +
-      '<td class="r">'+(tot>0?fmtNum(tot):'')+'</td><td class="r">'+(rate?'₹'+rate:'')+'</td>' +
-      '<td class="r"><strong>₹'+fmtNum(amt)+'</strong></td></tr>';
+      '<td class="c">'+(nos||'')+'</td><td class="c">'+(len||'')+'</td><td class="c">'+(ht||'')+'</td>' +
+      '<td class="c">'+(tot>0?fmtNum(tot):'')+'</td><td class="c">'+(rate?'₹'+rate:'')+'</td>' +
+      '<td class="c"><strong>₹'+fmtNum(amt)+'</strong></td></tr>';
   });
 
   return '<div class="bill-paper">' +
@@ -479,14 +483,16 @@ function buildLabourHTML() {
     (address ? '<div style="font-size:12px;color:#555">'+address+'</div>' : '') +
     (subject ? '<div style="font-size:12px;color:#666;margin-top:4px"><em>'+subject+'</em></div>' : '') + '</div>' +
     '<table class="bill-tbl"><thead><tr>' +
-    '<th>Sr.</th><th>Description</th><th class="r">Nos</th><th class="r">Length</th><th class="r">Height</th><th class="r">Total</th><th class="r">Rate</th><th class="r">Amount</th>' +
+    '<th>Sr.</th><th>Description</th><th class="c">Nos</th><th class="c">Length (m)</th><th class="c">Height (m)</th><th class="c">Total (m²)</th><th class="c">Rate (₹)</th><th class="c">Amount (₹)</th>' +
     '</tr></thead><tbody>'+rows+'</tbody>' +
-    '<tfoot><tr class="bill-total-row"><td colspan="7" style="text-align:right">TOTAL PAYABLE AMOUNT</td><td class="r">₹'+fmtNum(total)+'</td></tr></tfoot></table>' +
+    '<tfoot><tr class="bill-total-row"><td colspan="7" style="text-align:right;letter-spacing:.5px">TOTAL PAYABLE AMOUNT</td><td class="c" style="font-size:15px;letter-spacing:.3px">₹'+fmtNum(total)+'</td></tr></tfoot></table>' +
     '<div class="bill-words">('+numWords(total)+')</div>' +
-    (notes ? '<div style="font-size:11px;color:#555;border:1px dashed #DDD;padding:10px;border-radius:6px;margin-bottom:16px"><strong>Additional Notes:</strong><br>'+notes+'</div>' : '') +
-    '<div class="bill-footer"><div class="bill-sign"><div class="bill-sign-line"></div>' +
-    '<div style="font-size:12px;font-weight:700">For PS Construction</div>' +
-    '<div style="font-size:11px;color:#666">Authorized Signatory</div></div></div></div>';
+    (notes ? '<div style="font-size:11px;color:#555;border:1px dashed #DDD;padding:10px;border-radius:6px;margin-bottom:20px"><strong>Additional Notes:</strong><br>'+notes+'</div>' : '') +
+    '<div class="bill-footer"><div class="bill-sign-box">' +
+    '<div class="bill-sign-space"></div>' +
+    '<div class="bill-sign-name">For PS Construction</div>' +
+    '<div class="bill-sign-label">Authorized Signatory &amp; Stamp</div>' +
+    '</div></div></div>';
 }
 
 function buildMaterialHTML() {
@@ -506,9 +512,9 @@ function buildMaterialHTML() {
     var amt  = qty * rate;
     total += amt;
     rows += '<tr><td>'+(i+1)+'</td><td>'+desc+'</td>' +
-      '<td class="r">'+qty+' '+unit+'</td>' +
-      '<td class="r">'+(rate?'₹'+fmtNum(rate):'')+'</td>' +
-      '<td class="r"><strong>₹'+fmtNum(amt)+'</strong></td></tr>';
+      '<td class="c">'+qty+' '+unit+'</td>' +
+      '<td class="c">'+(rate?'₹'+fmtNum(rate):'')+'</td>' +
+      '<td class="c"><strong>₹'+fmtNum(amt)+'</strong></td></tr>';
   });
 
   return '<div class="bill-paper">' +
@@ -520,14 +526,16 @@ function buildMaterialHTML() {
     (address ? '<div style="font-size:12px;color:#555">'+address+'</div>' : '') +
     (subject ? '<div style="font-size:12px;color:#666;margin-top:4px"><strong>Subject:</strong> <em>'+subject+'</em></div>' : '') + '</div>' +
     '<table class="bill-tbl"><thead><tr>' +
-    '<th>S.No.</th><th>Description</th><th class="r">Qty</th><th class="r">Rate (₹)</th><th class="r">Amount (₹)</th>' +
+    '<th>S.No.</th><th>Description</th><th class="c">Qty</th><th class="c">Rate (₹)</th><th class="c">Amount (₹)</th>' +
     '</tr></thead><tbody>'+rows+'</tbody>' +
-    '<tfoot><tr class="bill-total-row"><td colspan="4" style="text-align:right">TOTAL PAYABLE AMOUNT</td><td class="r">₹'+fmtNum(total)+'</td></tr></tfoot></table>' +
+    '<tfoot><tr class="bill-total-row"><td colspan="4" style="text-align:right;letter-spacing:.5px">TOTAL PAYABLE AMOUNT</td><td class="c" style="font-size:15px;letter-spacing:.3px">₹'+fmtNum(total)+'</td></tr></tfoot></table>' +
     '<div class="bill-words">('+numWords(total)+')</div>' +
-    (notes ? '<div style="font-size:11px;color:#555;border:1px dashed #DDD;padding:10px;border-radius:6px;margin-bottom:16px">'+notes+'</div>' : '') +
-    '<div class="bill-footer"><div class="bill-sign"><div class="bill-sign-line"></div>' +
-    '<div style="font-size:12px;font-weight:700">For PS Construction</div>' +
-    '<div style="font-size:11px;color:#666">Authorized Signatory</div></div></div></div>';
+    (notes ? '<div style="font-size:11px;color:#555;border:1px dashed #DDD;padding:10px;border-radius:6px;margin-bottom:20px">'+notes+'</div>' : '') +
+    '<div class="bill-footer"><div class="bill-sign-box">' +
+    '<div class="bill-sign-space"></div>' +
+    '<div class="bill-sign-name">For PS Construction</div>' +
+    '<div class="bill-sign-label">Authorized Signatory &amp; Stamp</div>' +
+    '</div></div></div>';
 }
 
 // ── Preview & Print ──────────────────────────────────
@@ -561,14 +569,19 @@ function doPrint() {
     '.bill-to-name{font-weight:700;font-size:14px;}' +
     '.bill-tbl{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:12px;}' +
     '.bill-tbl th{background:#1A1208;color:#fff;padding:8px 10px;text-align:left;font-size:11px;}' +
+    '.bill-tbl th.c{text-align:center;}' +
     '.bill-tbl td{padding:7px 10px;border-bottom:1px solid #EEE;}' +
     '.bill-tbl tr:nth-child(even) td{background:#FAFAFA;}' +
-    '.bill-total-row td{background:#E05A00!important;color:#fff!important;font-weight:700;padding:10px;}' +
-    '.r{text-align:right;}' +
-    '.bill-footer{margin-top:24px;border-top:1px solid #EEE;padding-top:16px;display:flex;justify-content:flex-end;}' +
-    '.bill-sign-line{border-top:1px solid #999;width:160px;margin:30px auto 4px;}' +
+    '.bill-total-row td{background:#E05A00!important;color:#fff!important;font-weight:800;font-size:14px;padding:12px 10px;}' +
+    '.r{text-align:right;} .c{text-align:center;}' +
+    '.bill-footer{margin-top:10px;padding-top:20px;display:flex;justify-content:flex-end;}' +
+    '.bill-sign-box{text-align:center;min-width:220px;}' +
+    '.bill-sign-space{height:90px;border:1px dashed #CCC;border-radius:6px;margin-bottom:8px;background:#FAFAFA;}' +
+    '.bill-sign-label{font-size:11px;color:#888;}' +
+    '.bill-sign-name{font-size:12px;font-weight:700;margin-top:4px;}' +
     '.bill-words{font-size:11px;color:#555;font-style:italic;margin-bottom:16px;}' +
-    '@media print{@page{margin:15mm}}' +
+    '@media print{@page{margin:12mm;size:A4} body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}'  +
+    'html,body{height:auto;}}' +
     '</style></head><body>' + _printHTML + '</body></html>');
   w.document.close();
   w.focus();
