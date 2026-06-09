@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PS Construction – Bill Maker</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap');
+
+  :root {
+    --orange: #E05A00;
+    --orange-light: #FF7A2F;
+    --orange-pale: #FFF4EE;
+    --dark: #1A1208;
+    --mid: #4A3728;
+    --muted: #9B8070;
+    --border: #E8D8CC;
+    --bg: #FAF7F4;
+    --white: #FFFFFF;
+    --success: #2A7C4F;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
+    background: var(--bg);
+    color: var(--dark);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--dark);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    color: var(--white); font-size: 18px; font-weight: 700; letter-spacing: -.3px;
+  }
+  .logo-badge {
+    background: var(--orange); color: white;
+    font-size: 11px; font-weight: 700;
+    padding: 3px 8px; border-radius: 4px;
+    letter-spacing: .5px;
+  }
+  .header-sub { color: var(--muted); font-size: 13px; }
+
+  /* ── Tab bar ── */
+  .tabs {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    display: flex; padding: 0 32px; gap: 0;
+  }
+  .tab-btn {
+    padding: 14px 24px; border: none; background: none;
+    font-size: 14px; font-weight: 500; color: var(--muted);
+    cursor: pointer; border-bottom: 3px solid transparent;
+    transition: all .2s; display: flex; align-items: center; gap: 7px;
+  }
+  .tab-btn.active { color: var(--orange); border-color: var(--orange); }
+  .tab-btn:hover { color: var(--dark); }
+
+  /* ── Main layout ── */
+  .container { max-width: 960px; margin: 32px auto; padding: 0 24px 80px; }
+
+  /* ── Form card ── */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-size: 13px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .8px;
+    margin-bottom: 20px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title svg { color: var(--orange); }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+  .form-full { grid-column: 1/-1; }
+
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--mid); margin-bottom: 6px; }
+  input, select, textarea {
+    width: 100%; padding: 10px 14px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 14px; font-family: inherit; color: var(--dark);
+    background: var(--white); outline: none;
+    transition: border-color .2s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--orange); }
+  textarea { resize: vertical; min-height: 60px; }
+
+  /* ── Items table ── */
+  .items-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 16px;
+  }
+  .items-title { font-size: 13px; font-weight: 700; color: var(--dark); }
+
+  .table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    background: var(--orange-pale); color: var(--orange);
+    padding: 10px 12px; text-align: left;
+    font-size: 11px; font-weight: 700; letter-spacing: .5px;
+    border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  td { padding: 8px 10px; border-bottom: 1px solid #F2EBE6; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--orange-pale); }
+
+  td input {
+    padding: 7px 10px; border-radius: 6px; font-size: 13px;
+    border: 1.5px solid transparent; background: transparent;
+  }
+  td input:focus { background: white; border-color: var(--orange); }
+
+  .del-btn {
+    background: none; border: none; cursor: pointer;
+    color: #D0A090; font-size: 18px; padding: 4px;
+    border-radius: 4px; transition: color .2s;
+  }
+  .del-btn:hover { color: #C0392B; }
+
+  /* ── Buttons ── */
+  .btn {
+    padding: 10px 20px; border-radius: 8px; font-size: 14px;
+    font-weight: 600; cursor: pointer; border: none;
+    font-family: inherit; transition: all .2s;
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .btn-primary { background: var(--orange); color: white; }
+  .btn-primary:hover { background: var(--orange-light); }
+  .btn-outline {
+    background: none; border: 1.5px solid var(--border);
+    color: var(--mid);
+  }
+  .btn-outline:hover { border-color: var(--orange); color: var(--orange); }
+  .btn-success { background: var(--success); color: white; }
+  .btn-success:hover { opacity: .9; }
+
+  .actions {
+    display: flex; gap: 12px; justify-content: flex-end;
+    margin-top: 24px; flex-wrap: wrap;
+  }
+
+  /* ── Summary strip ── */
+  .summary {
+    background: var(--dark); color: white;
+    border-radius: 10px; padding: 20px 28px;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 20px; flex-wrap: wrap; gap: 16px;
+  }
+  .summary-label { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  .summary-value { font-size: 22px; font-weight: 700; }
+  .summary-words { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .summary-right { text-align: right; }
+
+  /* ── Print / Preview ── */
+  #preview-area { display: none; }
+
+  @media (max-width: 640px) {
+    .form-grid, .form-grid.three { grid-template-columns: 1fr; }
+    header { padding: 0 16px; }
+    .tabs { padding: 0 12px; }
+    .tab-btn { padding: 12px 14px; font-size: 13px; }
+    .container { margin: 16px auto; padding: 0 12px 60px; }
+    .card { padding: 18px; }
+  }
+
+  /* ── Print styles ── */
+  @media print {
+    body { background: white; }
+    header, .tabs, .actions, .no-print { display: none !important; }
+    .container { margin: 0; padding: 0; max-width: 100%; }
+    .card { border: none; box-shadow: none; }
+    .print-bill { display: block !important; }
+  }
+
+  /* ── Bill Preview Modal ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.5); z-index: 200;
+    justify-content: center; align-items: flex-start;
+    padding: 20px; overflow-y: auto;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white; width: 100%; max-width: 800px;
+    border-radius: 12px; overflow: hidden;
+    margin: auto;
+  }
+  .modal-header {
+    background: var(--dark); color: white;
+    padding: 16px 24px; display: flex;
+    justify-content: space-between; align-items: center;
+  }
+  .modal-close {
+    background: none; border: none; color: white;
+    font-size: 22px; cursor: pointer;
+  }
+  .modal-body { padding: 0; }
+
+  /* ── Bill printout ── */
+  .bill-paper {
+    background: white; padding: 32px 40px;
+    font-family: 'Inter', sans-serif; font-size: 13px;
+    color: #111; line-height: 1.5;
+  }
+  .bill-company {
+    text-align: center; border-bottom: 2px solid #E05A00;
+    padding-bottom: 12px; margin-bottom: 16px;
+  }
+  .bill-company-name {
+    font-size: 22px; font-weight: 800; color: #E05A00; letter-spacing: 1px;
+  }
+  .bill-company-sub { font-size: 12px; color: #666; }
+  .bill-meta {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; margin-bottom: 18px; font-size: 12px;
+  }
+  .bill-meta-right { text-align: right; }
+  .bill-meta strong { color: #333; }
+  .bill-to { background: #FFF4EE; border-left: 3px solid #E05A00; padding: 10px 14px; margin-bottom: 18px; border-radius: 0 6px 6px 0; }
+  .bill-to-name { font-weight: 700; font-size: 14px; }
+
+  .bill-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 12px; }
+  .bill-table th {
+    background: #1A1208; color: white; padding: 8px 10px;
+    text-align: left; font-size: 11px;
+  }
+  .bill-table td { padding: 7px 10px; border-bottom: 1px solid #EEE; }
+  .bill-table tr:nth-child(even) td { background: #FAFAFA; }
+  .bill-table .num { text-align: right; }
+
+  .bill-total-row { background: #E05A00 !important; }
+  .bill-total-row td { color: white; font-weight: 700; padding: 10px; }
+
+  .bill-footer { margin-top: 24px; border-top: 1px solid #EEE; padding-top: 16px; display: flex; justify-content: flex-end; }
+  .bill-sign { text-align: center; }
+  .bill-sign-line { border-top: 1px solid #999; width: 160px; margin: 30px auto 4px; }
+  .bill-words { font-size: 11px; color: #666; font-style: italic; margin-bottom: 16px; }
+  .print-btn-bar { padding: 16px 24px; display: flex; gap: 10px; justify-content: flex-end; background: #F5F5F5; border-top: 1px solid #EEE; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span>🏗️</span>
+    <span>PS Construction</span>
+    <span class="logo-badge">BILL MAKER</span>
+  </div>
+  <span class="header-sub">Mob: 8287528881</span>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('labour')" id="tab-labour">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>
+    Labour / Work Bill
+  </button>
+  <button class="tab-btn" onclick="switchTab('material')" id="tab-material">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+    Material / Supply Bill
+  </button>
+</div>
+
+<div class="container">
+
+  <!-- ─────── LABOUR BILL FORM ─────── -->
+  <div id="form-labour">
+    <div class="card">
+      <div class="card-title">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        Bill Details
+      </div>
+      <div class="form-grid three">
+        <div>
+          <label>Invoice No.</label>
+          <input type="text" id="l-invoice" placeholder="e.g. 12">
+        </div>
+        <div>
+          <label>Date</label>
+          <input type="date" id="l-date">
+        </div>
+        <div>
+          <label>Bill Type / RA No.</label>
+          <input type="text" id="l-ra" placeholder="e.g. 3rd Floor Bill 1st RA">
+        </div>
+        <div>
+          <label>Bill To (Client Name)</label>
+          <input type="text" id="l-client" placeholder="e.g. Delhi Public School">
+        </div>
+        <div class="form-full">
+          <label>Client Address (optional)</label>
+          <input type="text" id="l-address" placeholder="e.g. Sector 67A, Gurgaon">
+        </div>
+        <div class="form-full">
+          <label>Subject / Work Description</label>
+          <input type="text" id="l-subject" placeholder="e.g. AAC Block P/C Labour Rate Work – 3rd Floor A & B Block Area">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="items-header">
+        <span class="items-title">Work Items (Nos × Length × Height)</span>
+        <button class="btn btn-outline" onclick="addLabourRow()">+ Row Add Karo</button>
+      </div>
+      <div class="table-wrap">
+        <table id="labour-table">
+          <thead>
+            <tr>
+              <th>Sr.</th>
+              <th style="min-width:280px">Description</th>
+              <th>Nos</th>
+              <th>Length (m)</th>
+              <th>Height (m)</th>
+              <th>Total (m²/m)</th>
+              <th>Rate (₹)</th>
+              <th>Amount (₹)</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="labour-tbody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:12px">
+        <button class="btn btn-outline" onclick="addLabourRow()" style="font-size:13px">
+          + Item Add Karo
+        </button>
+      </div>
+    </div>
+
+    <div class="card" id="l-notes-card">
+      <div class="card-title">Additional Notes (Optional)</div>
+      <textarea id="l-notes" rows="3" placeholder="e.g. Additional Works Included: 9 Nos. Brick Paya (9×9) Brickwork and Plastering..."></textarea>
+    </div>
+
+    <div class="summary" id="l-summary">
+      <div>
+        <div class="summary-label">Kul Rakam</div>
+        <div class="summary-value" id="l-total-display">₹0</div>
+        <div class="summary-words" id="l-words-display">–</div>
+      </div>
+      <div class="summary-right">
+        <div class="summary-label">Items</div>
+        <div class="summary-value" id="l-item-count">0</div>
+      </div>
+    </div>
+
+    <div class="actions no-print">
+      <button class="btn btn-outline" onclick="clearForm('labour')">🗑 Clear</button>
+      <button class="btn btn-primary" onclick="previewBill('labour')">👁 Preview Bill</button>
+      <button class="btn btn-success" onclick="printBill('labour')">🖨 Print / Save PDF</button>
+    </div>
+  </div>
+
+  <!-- ─────── MATERIAL BILL FORM ─────── -->
+  <div id="form-material" style="display:none">
+    <div class="card">
+      <div class="card-title">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        Bill Details
+      </div>
+      <div class="form-grid three">
+        <div>
+          <label>Invoice No.</label>
+          <input type="text" id="m-invoice" placeholder="e.g. 11">
+        </div>
+        <div>
+          <label>Date</label>
+          <input type="date" id="m-date">
+        </div>
+        <div>
+          <label>Bill To (Client Name)</label>
+          <input type="text" id="m-client" placeholder="e.g. Delhi Public School">
+        </div>
+        <div class="form-full">
+          <label>Client Address (optional)</label>
+          <input type="text" id="m-address" placeholder="e.g. Sector 67A, Gurgaon, Haryana">
+        </div>
+        <div class="form-full">
+          <label>Subject</label>
+          <input type="text" id="m-subject" placeholder="e.g. Material Supply and Rental Charges">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="items-header">
+        <span class="items-title">Material / Supply Items</span>
+        <button class="btn btn-outline" onclick="addMaterialRow()">+ Row Add Karo</button>
+      </div>
+      <div class="table-wrap">
+        <table id="material-table">
+          <thead>
+            <tr>
+              <th>S.No.</th>
+              <th style="min-width:200px">Description</th>
+              <th>Qty</th>
+              <th>Unit</th>
+              <th>Rate (₹)</th>
+              <th>Amount (₹)</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="material-tbody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:12px">
+        <button class="btn btn-outline" onclick="addMaterialRow()" style="font-size:13px">
+          + Item Add Karo
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Additional Notes (Optional)</div>
+      <textarea id="m-notes" rows="3" placeholder="Koi extra note ya terms..."></textarea>
+    </div>
+
+    <div class="summary" id="m-summary">
+      <div>
+        <div class="summary-label">Kul Rakam</div>
+        <div class="summary-value" id="m-total-display">₹0</div>
+        <div class="summary-words" id="m-words-display">–</div>
+      </div>
+      <div class="summary-right">
+        <div class="summary-label">Items</div>
+        <div class="summary-value" id="m-item-count">0</div>
+      </div>
+    </div>
+
+    <div class="actions no-print">
+      <button class="btn btn-outline" onclick="clearForm('material')">🗑 Clear</button>
+      <button class="btn btn-primary" onclick="previewBill('material')">👁 Preview Bill</button>
+      <button class="btn btn-success" onclick="printBill('material')">🖨 Print / Save PDF</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Preview Modal ── -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span style="font-weight:700">Bill Preview</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ── Utilities ──
+function today() {
+  return new Date().toISOString().split('T')[0];
+}
+function fmtDate(d) {
+  if (!d) return '';
+  const [y, m, day] = d.split('-');
+  return `${day}-${m}-${y}`;
+}
+function fmtNum(n) {
+  return new Intl.NumberFormat('en-IN').format(Math.round(n));
+}
+function numWords(n) {
+  if (n === 0) return 'Zero Only';
+  const a = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine',
+    'Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+  const b = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  function words(num) {
+    if (num < 20) return a[num];
+    if (num < 100) return b[Math.floor(num/10)] + (num%10 ? ' '+a[num%10] : '');
+    if (num < 1000) return a[Math.floor(num/100)] + ' Hundred' + (num%100 ? ' '+words(num%100) : '');
+    if (num < 100000) return words(Math.floor(num/1000)) + ' Thousand' + (num%1000 ? ' '+words(num%1000) : '');
+    if (num < 10000000) return words(Math.floor(num/100000)) + ' Lakh' + (num%100000 ? ' '+words(num%100000) : '');
+    return words(Math.floor(num/10000000)) + ' Crore' + (num%10000000 ? ' '+words(num%10000000) : '');
+  }
+  return words(Math.round(n)) + ' Only';
+}
+
+// ── Tab switch ──
+function switchTab(tab) {
+  document.getElementById('form-labour').style.display = tab === 'labour' ? '' : 'none';
+  document.getElementById('form-material').style.display = tab === 'material' ? '' : 'none';
+  document.getElementById('tab-labour').classList.toggle('active', tab === 'labour');
+  document.getElementById('tab-material').classList.toggle('active', tab === 'material');
+}
+
+// ─────────────────────────────────────────
+// LABOUR BILL
+// ─────────────────────────────────────────
+let lRows = [];
+let lCounter = 0;
+
+function addLabourRow(desc='', nos='', len='', ht='', rate='') {
+  lCounter++;
+  const id = lCounter;
+  lRows.push(id);
+  const tbody = document.getElementById('labour-tbody');
+  const tr = document.createElement('tr');
+  tr.id = 'lr-' + id;
+  tr.innerHTML = `
+    <td style="text-align:center;color:#999;font-size:12px" id="lnum-${id}">${lRows.length}</td>
+    <td><input type="text" id="ld-${id}" value="${desc}" placeholder="Description likho..." onchange="calcLabourRow(${id})"></td>
+    <td><input type="number" id="ln-${id}" value="${nos}" placeholder="0" style="width:60px;text-align:right" oninput="calcLabourRow(${id})"></td>
+    <td><input type="number" id="ll-${id}" value="${len}" placeholder="0" style="width:70px;text-align:right" step="0.01" oninput="calcLabourRow(${id})"></td>
+    <td><input type="number" id="lh-${id}" value="${ht}" placeholder="0" style="width:70px;text-align:right" step="0.01" oninput="calcLabourRow(${id})"></td>
+    <td id="ltot-${id}" style="text-align:right;font-weight:600;color:#555">—</td>
+    <td><input type="number" id="lr-${id}" value="${rate}" placeholder="47" style="width:70px;text-align:right" oninput="calcLabourRow(${id})"></td>
+    <td id="lamt-${id}" style="text-align:right;font-weight:700;color:#E05A00">—</td>
+    <td><button class="del-btn" onclick="delLabourRow(${id})">×</button></td>
+  `;
+  tbody.appendChild(tr);
+  calcLabourRow(id);
+}
+
+function calcLabourRow(id) {
+  const nos = parseFloat(document.getElementById('ln-'+id)?.value) || 0;
+  const len = parseFloat(document.getElementById('ll-'+id)?.value) || 0;
+  const ht  = parseFloat(document.getElementById('lh-'+id)?.value) || 0;
+  const rate= parseFloat(document.getElementById('lr-'+id)?.value) || 0;
+  const tot = nos * len * ht;
+  const amt = tot * rate;
+  document.getElementById('ltot-'+id).textContent = tot > 0 ? fmtNum(tot) : '—';
+  document.getElementById('lamt-'+id).textContent = amt > 0 ? '₹'+fmtNum(amt) : '—';
+  updateLabourTotal();
+}
+
+function delLabourRow(id) {
+  document.getElementById('lr-'+id).remove();
+  lRows = lRows.filter(r => r !== id);
+  renumberLabour();
+  updateLabourTotal();
+}
+
+function renumberLabour() {
+  lRows.forEach((id, i) => {
+    const el = document.getElementById('lnum-'+id);
+    if (el) el.textContent = i + 1;
+  });
+}
+
+function updateLabourTotal() {
+  let total = 0;
+  lRows.forEach(id => {
+    const nos = parseFloat(document.getElementById('ln-'+id)?.value) || 0;
+    const len = parseFloat(document.getElementById('ll-'+id)?.value) || 0;
+    const ht  = parseFloat(document.getElementById('lh-'+id)?.value) || 0;
+    const rate= parseFloat(document.getElementById('lr-'+id)?.value) || 0;
+    total += nos * len * ht * rate;
+  });
+  document.getElementById('l-total-display').textContent = '₹' + fmtNum(total);
+  document.getElementById('l-words-display').textContent = numWords(total);
+  document.getElementById('l-item-count').textContent = lRows.length;
+}
+
+// ─────────────────────────────────────────
+// MATERIAL BILL
+// ─────────────────────────────────────────
+let mRows = [];
+let mCounter = 0;
+
+function addMaterialRow(desc='', qty='', unit='pcs', rate='') {
+  mCounter++;
+  const id = mCounter;
+  mRows.push(id);
+  const tbody = document.getElementById('material-tbody');
+  const tr = document.createElement('tr');
+  tr.id = 'mr-' + id;
+  tr.innerHTML = `
+    <td style="text-align:center;color:#999;font-size:12px" id="mnum-${id}">${mRows.length}</td>
+    <td><input type="text" id="md-${id}" value="${desc}" placeholder="Item ka naam..." oninput="calcMaterialRow(${id})"></td>
+    <td><input type="text" id="mq-${id}" value="${qty}" placeholder="20 pcs" style="width:80px" oninput="calcMaterialRow(${id})"></td>
+    <td>
+      <select id="mu-${id}" onchange="calcMaterialRow(${id})" style="width:80px">
+        <option value="pcs" ${unit==='pcs'?'selected':''}>pcs</option>
+        <option value="sq.ft." ${unit==='sq.ft.'?'selected':''}>sq.ft.</option>
+        <option value="m²" ${unit==='m²'?'selected':''}>m²</option>
+        <option value="m" ${unit==='m'?'selected':''}>m</option>
+        <option value="kg" ${unit==='kg'?'selected':''}>kg</option>
+        <option value="ton" ${unit==='ton'?'selected':''}>ton</option>
+        <option value="bag" ${unit==='bag'?'selected':''}>bag</option>
+        <option value="ltr" ${unit==='ltr'?'selected':''}>ltr</option>
+        <option value="nos" ${unit==='nos'?'selected':''}>nos</option>
+        <option value="month" ${unit==='month'?'selected':''}>month</option>
+        <option value="—" ${unit==='—'?'selected':''}>—</option>
+      </select>
+    </td>
+    <td><input type="number" id="mr-${id}" value="${rate}" placeholder="0" style="width:90px;text-align:right" oninput="calcMaterialRow(${id})"></td>
+    <td id="mamt-${id}" style="text-align:right;font-weight:700;color:#E05A00">—</td>
+    <td><button class="del-btn" onclick="delMaterialRow(${id})">×</button></td>
+  `;
+  tbody.appendChild(tr);
+  calcMaterialRow(id);
+}
+
+function calcMaterialRow(id) {
+  const qtyStr = document.getElementById('mq-'+id)?.value || '';
+  const qty = parseFloat(qtyStr) || 0;
+  const rate = parseFloat(document.getElementById('mr-'+id)?.value) || 0;
+  const amt = qty * rate;
+  document.getElementById('mamt-'+id).textContent = amt > 0 ? '₹'+fmtNum(amt) : '—';
+  updateMaterialTotal();
+}
+
+function delMaterialRow(id) {
+  document.getElementById('mr-'+id).remove();
+  mRows = mRows.filter(r => r !== id);
+  renumberMaterial();
+  updateMaterialTotal();
+}
+
+function renumberMaterial() {
+  mRows.forEach((id, i) => {
+    const el = document.getElementById('mnum-'+id);
+    if (el) el.textContent = i + 1;
+  });
+}
+
+function updateMaterialTotal() {
+  let total = 0;
+  mRows.forEach(id => {
+    const qty = parseFloat(document.getElementById('mq-'+id)?.value) || 0;
+    const rate= parseFloat(document.getElementById('mr-'+id)?.value) || 0;
+    total += qty * rate;
+  });
+  document.getElementById('m-total-display').textContent = '₹' + fmtNum(total);
+  document.getElementById('m-words-display').textContent = numWords(total);
+  document.getElementById('m-item-count').textContent = mRows.length;
+}
+
+// ─────────────────────────────────────────
+// CLEAR
+// ─────────────────────────────────────────
+function clearForm(type) {
+  if (!confirm('Sab data clear ho jayega. Sure ho?')) return;
+  if (type === 'labour') {
+    document.getElementById('labour-tbody').innerHTML = '';
+    lRows = []; lCounter = 0;
+    ['l-invoice','l-date','l-ra','l-client','l-address','l-subject','l-notes']
+      .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    updateLabourTotal();
+  } else {
+    document.getElementById('material-tbody').innerHTML = '';
+    mRows = []; mCounter = 0;
+    ['m-invoice','m-date','m-client','m-address','m-subject','m-notes']
+      .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    updateMaterialTotal();
+  }
+}
+
+// ─────────────────────────────────────────
+// GENERATE BILL HTML
+// ─────────────────────────────────────────
+function buildLabourBillHTML() {
+  const inv = document.getElementById('l-invoice').value || '—';
+  const date = fmtDate(document.getElementById('l-date').value);
+  const ra = document.getElementById('l-ra').value || '';
+  const client = document.getElementById('l-client').value || '—';
+  const address = document.getElementById('l-address').value || '';
+  const subject = document.getElementById('l-subject').value || '';
+  const notes = document.getElementById('l-notes').value || '';
+
+  let rows = '';
+  let total = 0;
+  lRows.forEach((id, i) => {
+    const desc = document.getElementById('ld-'+id)?.value || '';
+    const nos  = parseFloat(document.getElementById('ln-'+id)?.value) || 0;
+    const len  = parseFloat(document.getElementById('ll-'+id)?.value) || 0;
+    const ht   = parseFloat(document.getElementById('lh-'+id)?.value) || 0;
+    const rate = parseFloat(document.getElementById('lr-'+id)?.value) || 0;
+    const tot  = nos * len * ht;
+    const amt  = tot * rate;
+    total += amt;
+    rows += `<tr>
+      <td>${i+1}</td>
+      <td>${desc}</td>
+      <td class="num">${nos||''}</td>
+      <td class="num">${len||''}</td>
+      <td class="num">${ht||''}</td>
+      <td class="num">${tot>0?fmtNum(tot):''}</td>
+      <td class="num">${rate?'₹'+rate:''}</td>
+      <td class="num"><strong>₹${fmtNum(amt)}</strong></td>
+    </tr>`;
+  });
+
+  return `
+  <div class="bill-paper">
+    <div class="bill-company">
+      <div class="bill-company-name">PS CONSTRUCTION</div>
+      <div class="bill-company-sub">Mob: 8287528881 &nbsp;|&nbsp; ${ra}</div>
+    </div>
+    <div class="bill-meta">
+      <div><strong>Invoice No.:</strong> ${inv}</div>
+      <div class="bill-meta-right"><strong>Date:</strong> ${date}</div>
+    </div>
+    <div class="bill-to">
+      <div style="font-size:11px;color:#888;margin-bottom:3px">BILL TO</div>
+      <div class="bill-to-name">${client}</div>
+      ${address ? `<div style="font-size:12px;color:#555">${address}</div>` : ''}
+      ${subject ? `<div style="font-size:12px;color:#666;margin-top:4px"><em>${subject}</em></div>` : ''}
+    </div>
+    <table class="bill-table">
+      <thead>
+        <tr>
+          <th>Sr.</th><th>Description</th><th class="num">Nos</th>
+          <th class="num">Length</th><th class="num">Height</th>
+          <th class="num">Total</th><th class="num">Rate</th><th class="num">Amount</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+      <tfoot>
+        <tr class="bill-total-row">
+          <td colspan="7" style="text-align:right">KULL PAYABLE AMOUNT</td>
+          <td class="num">₹${fmtNum(total)}</td>
+        </tr>
+      </tfoot>
+    </table>
+    <div class="bill-words">(${numWords(total)})</div>
+    ${notes ? `<div style="font-size:11px;color:#555;border:1px dashed #DDD;padding:10px;border-radius:6px;margin-bottom:16px"><strong>Additional Notes:</strong><br>${notes}</div>` : ''}
+    <div class="bill-footer">
+      <div class="bill-sign">
+        <div class="bill-sign-line"></div>
+        <div style="font-size:12px;font-weight:700">For PS Construction</div>
+        <div style="font-size:11px;color:#666">Authorized Signatory</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildMaterialBillHTML() {
+  const inv = document.getElementById('m-invoice').value || '—';
+  const date = fmtDate(document.getElementById('m-date').value);
+  const client = document.getElementById('m-client').value || '—';
+  const address = document.getElementById('m-address').value || '';
+  const subject = document.getElementById('m-subject').value || '';
+  const notes = document.getElementById('m-notes').value || '';
+
+  let rows = '';
+  let total = 0;
+  mRows.forEach((id, i) => {
+    const desc = document.getElementById('md-'+id)?.value || '';
+    const qty  = document.getElementById('mq-'+id)?.value || '';
+    const unit = document.getElementById('mu-'+id)?.value || '';
+    const rate = parseFloat(document.getElementById('mr-'+id)?.value) || 0;
+    const qtyNum = parseFloat(qty) || 0;
+    const amt = qtyNum * rate;
+    total += amt;
+    rows += `<tr>
+      <td>${i+1}</td>
+      <td>${desc}</td>
+      <td class="num">${qty} ${unit}</td>
+      <td class="num">${rate?'₹'+fmtNum(rate):''}</td>
+      <td class="num"><strong>₹${fmtNum(amt)}</strong></td>
+    </tr>`;
+  });
+
+  return `
+  <div class="bill-paper">
+    <div class="bill-company">
+      <div class="bill-company-name">PS CONSTRUCTION</div>
+      <div class="bill-company-sub">Mob: 8287528881 &nbsp;|&nbsp; INVOICE</div>
+    </div>
+    <div class="bill-meta">
+      <div><strong>Invoice No.:</strong> ${inv}</div>
+      <div class="bill-meta-right"><strong>Date:</strong> ${date}</div>
+    </div>
+    <div class="bill-to">
+      <div style="font-size:11px;color:#888;margin-bottom:3px">BILL TO</div>
+      <div class="bill-to-name">${client}</div>
+      ${address ? `<div style="font-size:12px;color:#555">${address}</div>` : ''}
+      ${subject ? `<div style="font-size:12px;color:#666;margin-top:4px"><strong>Subject:</strong> <em>${subject}</em></div>` : ''}
+    </div>
+    <table class="bill-table">
+      <thead>
+        <tr>
+          <th>S.No.</th><th>Description</th>
+          <th class="num">Qty</th><th class="num">Rate (₹)</th><th class="num">Amount (₹)</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+      <tfoot>
+        <tr class="bill-total-row">
+          <td colspan="4" style="text-align:right">KULL PAYABLE AMOUNT</td>
+          <td class="num">₹${fmtNum(total)}</td>
+        </tr>
+      </tfoot>
+    </table>
+    <div class="bill-words">(${numWords(total)})</div>
+    ${notes ? `<div style="font-size:11px;color:#555;border:1px dashed #DDD;padding:10px;border-radius:6px;margin-bottom:16px">${notes}</div>` : ''}
+    <div class="bill-footer">
+      <div class="bill-sign">
+        <div class="bill-sign-line"></div>
+        <div style="font-size:12px;font-weight:700">For PS Construction</div>
+        <div style="font-size:11px;color:#666">Authorized Signatory</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─────────────────────────────────────────
+// PREVIEW & PRINT
+// ─────────────────────────────────────────
+function previewBill(type) {
+  const html = type === 'labour' ? buildLabourBillHTML() : buildMaterialBillHTML();
+  document.getElementById('modal-body').innerHTML = `
+    ${html}
+    <div class="print-btn-bar">
+      <button class="btn btn-outline" onclick="closeModal()">✕ Bandh Karo</button>
+      <button class="btn btn-success" onclick="doPrint()">🖨 Print / Save PDF</button>
+    </div>`;
+  document.getElementById('modal').classList.add('open');
+  window._currentPrintHTML = html;
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+function doPrint() {
+  const w = window.open('', '_blank');
+  w.document.write(`<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <title>PS Construction Invoice</title>
+    <style>
+      body{margin:0;font-family:Inter,Arial,sans-serif;font-size:13px;}
+      .bill-paper{padding:32px 40px;}
+      .bill-company{text-align:center;border-bottom:2px solid #E05A00;padding-bottom:12px;margin-bottom:16px;}
+      .bill-company-name{font-size:22px;font-weight:800;color:#E05A00;letter-spacing:1px;}
+      .bill-company-sub{font-size:12px;color:#666;}
+      .bill-meta{display:flex;justify-content:space-between;margin-bottom:18px;font-size:12px;}
+      .bill-to{background:#FFF4EE;border-left:3px solid #E05A00;padding:10px 14px;margin-bottom:18px;}
+      .bill-to-name{font-weight:700;font-size:14px;}
+      .bill-table{width:100%;border-collapse:collapse;margin-bottom:18px;font-size:12px;}
+      .bill-table th{background:#1A1208;color:white;padding:8px 10px;text-align:left;font-size:11px;}
+      .bill-table td{padding:7px 10px;border-bottom:1px solid #EEE;}
+      .bill-table tr:nth-child(even) td{background:#FAFAFA;}
+      .bill-total-row td{background:#E05A00!important;color:white;font-weight:700;padding:10px;}
+      .num{text-align:right;}
+      .bill-footer{margin-top:24px;border-top:1px solid #EEE;padding-top:16px;display:flex;justify-content:flex-end;}
+      .bill-sign-line{border-top:1px solid #999;width:160px;margin:30px auto 4px;}
+      .bill-words{font-size:11px;color:#666;font-style:italic;margin-bottom:16px;}
+      @media print{@page{margin:15mm}}
+    </style></head><body>${window._currentPrintHTML}</body></html>`);
+  w.document.close();
+  w.focus();
+  setTimeout(() => { w.print(); }, 500);
+}
+
+function printBill(type) {
+  const html = type === 'labour' ? buildLabourBillHTML() : buildMaterialBillHTML();
+  window._currentPrintHTML = html;
+  doPrint();
+}
+
+// ─────────────────────────────────────────
+// INIT — Set today's date & add sample rows
+// ─────────────────────────────────────────
+document.getElementById('l-date').value = today();
+document.getElementById('m-date').value = today();
+
+// Start with 3 empty rows each
+addLabourRow(); addLabourRow(); addLabourRow();
+addMaterialRow(); addMaterialRow(); addMaterialRow();
+</script>
+</body>
+</html>
